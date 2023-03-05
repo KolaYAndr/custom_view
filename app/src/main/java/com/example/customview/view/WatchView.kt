@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.util.AttributeSet
 import android.view.View
 import java.time.LocalTime
 import kotlin.math.PI
@@ -11,7 +12,9 @@ import kotlin.math.cos
 import kotlin.math.min
 import kotlin.math.sin
 
-class WatchView(context: Context) : View(context) {
+class WatchView @JvmOverloads constructor(
+    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
+) : View(context, attrs, defStyleAttr) {
     private val timeInSeconds = LocalTime.now().toSecondOfDay()
     private val paint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
