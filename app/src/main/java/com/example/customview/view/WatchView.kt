@@ -7,10 +7,12 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.View
 import java.time.LocalTime
+import java.util.*
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.min
 import kotlin.math.sin
+
 
 class WatchView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -29,13 +31,22 @@ class WatchView @JvmOverloads constructor(
         drawHands(canvas)
 
         canvas?.restore()
+
+        canvas?.save()
+        moveWithDelay(canvas)
+        canvas?.restore()
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        val usualSize = 500
         val widthSize = MeasureSpec.getSize(widthMeasureSpec)
+        val widthMode = MeasureSpec.getMode(widthMeasureSpec)
         val heightSize = MeasureSpec.getSize(heightMeasureSpec)
+        val heightMode = MeasureSpec.getMode(heightMeasureSpec)
 
-        val size = min(widthSize, heightSize)
+        val width = if (widthMode == MeasureSpec.UNSPECIFIED) usualSize else widthSize
+        val height = if (heightMode == MeasureSpec.UNSPECIFIED) usualSize else heightSize
+        val size = min(height, width)
 
         setMeasuredDimension(size, size)
     }
@@ -53,13 +64,13 @@ class WatchView @JvmOverloads constructor(
         paint.color = Color.DKGRAY
 
         canvas?.drawCircle(0f, 0f, 0.85f, paint)
-
-        paint.color = Color.GRAY
-        paint.style = Paint.Style.STROKE
-        paint.strokeWidth = Constants.secondHandStrokeWidth
     }
 
     private fun drawScaleLines(canvas: Canvas?) {
+        paint.color = Color.GRAY
+        paint.style = Paint.Style.STROKE
+        paint.strokeWidth = Constants.secondHandStrokeWidth
+
         val step = 2 * PI / 60
         val scale = Constants.normalScaleSize
 
@@ -84,6 +95,7 @@ class WatchView @JvmOverloads constructor(
 
     private fun drawHands(canvas: Canvas?) {
         paint.color = Color.WHITE
+        paint.style = Paint.Style.STROKE
 
         drawHourHand(canvas)
         drawMinuteHand(canvas)
@@ -121,6 +133,14 @@ class WatchView @JvmOverloads constructor(
         canvas?.drawLine(0f, 0f, 0f, .9f, paint)
 
         canvas?.restore()
+    }
+
+    private fun moveWithDelay(canvas: Canvas?) {
+        Timer().scheduleAtFixedRate(object : TimerTask() {
+            override fun run() {
+                drawHands(canvas)
+            }
+        }, 0, 1000)
     }
 
     object Constants {
