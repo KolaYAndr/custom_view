@@ -19,6 +19,7 @@ class WatchView @JvmOverloads constructor(
 ) : View(context, attrs, defStyleAttr) {
     private var timeInSeconds = LocalTime.now().toSecondOfDay()
     private val paint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val timer = Timer()
 
     init {
         moveWithDelay()
@@ -72,6 +73,7 @@ class WatchView @JvmOverloads constructor(
         paint.strokeWidth = Constants.secondHandStrokeWidth
 
         val step = 2 * PI / 60
+        val scale = Constants.normalScaleSize
 
         for (i in 0..60) {
             val x1 = cos(2 * PI - step * i).toFloat()
@@ -80,13 +82,12 @@ class WatchView @JvmOverloads constructor(
             var x2: Float
             var y2: Float
 
-
             if (i % 5 == 0) {
                 x2 = x1 * Constants.largeScaleSize
                 y2 = y1 * Constants.largeScaleSize
             } else {
-                x2 = x1 * Constants.normalScaleSize
-                y2 = y1 * Constants.normalScaleSize
+                x2 = x1 * scale
+                y2 = y1 * scale
             }
 
             canvas?.drawLine(x1, y1, x2, y2, paint)
@@ -136,7 +137,7 @@ class WatchView @JvmOverloads constructor(
     }
 
     private fun moveWithDelay() {
-        Timer().scheduleAtFixedRate(object : TimerTask() {
+        timer.scheduleAtFixedRate(object : TimerTask() {
             override fun run() {
                 timeInSeconds = LocalTime.now().toSecondOfDay()
                 invalidate()
@@ -144,6 +145,10 @@ class WatchView @JvmOverloads constructor(
         }, 0, 1000)
     }
 
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        timer.cancel()
+    }
 
     object Constants {
         const val secondHandStrokeWidth = .01f
