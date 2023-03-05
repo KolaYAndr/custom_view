@@ -17,8 +17,13 @@ import kotlin.math.sin
 class WatchView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
-    private val timeInSeconds = LocalTime.now().toSecondOfDay()
+    private var timeInSeconds = LocalTime.now().toSecondOfDay()
     private val paint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val timer = Timer()
+
+    init {
+        moveWithDelay()
+    }
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
@@ -30,10 +35,6 @@ class WatchView @JvmOverloads constructor(
         drawScaleLines(canvas)
         drawHands(canvas)
 
-        canvas?.restore()
-
-        canvas?.save()
-        moveWithDelay(canvas)
         canvas?.restore()
     }
 
@@ -102,7 +103,7 @@ class WatchView @JvmOverloads constructor(
         drawSecondHand(canvas)
     }
 
-    private fun drawHourHand(canvas: Canvas?) { //method draws hour hand
+    private fun drawHourHand(canvas: Canvas?) {
         canvas?.save()
 
         canvas?.rotate(-(timeInSeconds / 3600.0 * 30).toFloat())
@@ -135,12 +136,18 @@ class WatchView @JvmOverloads constructor(
         canvas?.restore()
     }
 
-    private fun moveWithDelay(canvas: Canvas?) {
-        Timer().scheduleAtFixedRate(object : TimerTask() {
+    private fun moveWithDelay() {
+        timer.scheduleAtFixedRate(object : TimerTask() {
             override fun run() {
-                drawHands(canvas)
+                timeInSeconds = LocalTime.now().toSecondOfDay()
+                invalidate()
             }
         }, 0, 1000)
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        timer.cancel()
     }
 
     object Constants {
