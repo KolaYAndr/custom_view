@@ -4,18 +4,15 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.util.AttributeSet
 import android.view.View
 import java.time.LocalTime
 import kotlin.math.PI
 import kotlin.math.cos
+import kotlin.math.min
 import kotlin.math.sin
 
-class WatchView(context: Context, attributeSet: AttributeSet?, defStyleAttr: Int) :
-    View(context, attributeSet, defStyleAttr) {
-
-    private var timeInSeconds = LocalTime.now().toSecondOfDay()
-
+class WatchView(context: Context) : View(context) {
+    private val timeInSeconds = LocalTime.now().toSecondOfDay()
     private val paint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
     override fun onDraw(canvas: Canvas?) {
@@ -32,13 +29,17 @@ class WatchView(context: Context, attributeSet: AttributeSet?, defStyleAttr: Int
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        val widthSize = MeasureSpec.getSize(widthMeasureSpec)
+        val heightSize = MeasureSpec.getSize(heightMeasureSpec)
 
+        val size = min(widthSize, heightSize)
 
+        setMeasuredDimension(size, size)
     }
 
-    private fun drawBackground(canvas: Canvas?){
-        canvas?.scale(.5f * width, -.5f * width)
+
+    private fun drawBackground(canvas: Canvas?) {
+        canvas?.scale(.5f * width, -.5f * height)
         canvas?.translate(1f, -1f)
 
         paint.color = Color.BLACK
@@ -55,7 +56,7 @@ class WatchView(context: Context, attributeSet: AttributeSet?, defStyleAttr: Int
         paint.strokeWidth = Constants.secondHandStrokeWidth
     }
 
-    private fun drawScaleLines(canvas: Canvas?){
+    private fun drawScaleLines(canvas: Canvas?) {
         val step = 2 * PI / 60
         val scale = Constants.normalScaleSize
 
@@ -78,7 +79,7 @@ class WatchView(context: Context, attributeSet: AttributeSet?, defStyleAttr: Int
         }
     }
 
-    private fun drawHands(canvas: Canvas?){
+    private fun drawHands(canvas: Canvas?) {
         paint.color = Color.WHITE
 
         drawHourHand(canvas)
@@ -86,7 +87,7 @@ class WatchView(context: Context, attributeSet: AttributeSet?, defStyleAttr: Int
         drawSecondHand(canvas)
     }
 
-    private fun drawHourHand(canvas: Canvas?){ //method draws hour hand
+    private fun drawHourHand(canvas: Canvas?) { //method draws hour hand
         canvas?.save()
 
         canvas?.rotate(-(timeInSeconds / 3600.0 * 30).toFloat())
@@ -97,7 +98,7 @@ class WatchView(context: Context, attributeSet: AttributeSet?, defStyleAttr: Int
         canvas?.restore()
     }
 
-    private fun drawMinuteHand(canvas: Canvas?){
+    private fun drawMinuteHand(canvas: Canvas?) {
         canvas?.save()
 
         canvas?.rotate(-(timeInSeconds / 60.0 * 6).toFloat())
@@ -108,7 +109,7 @@ class WatchView(context: Context, attributeSet: AttributeSet?, defStyleAttr: Int
         canvas?.restore()
     }
 
-    private fun drawSecondHand(canvas: Canvas?){
+    private fun drawSecondHand(canvas: Canvas?) {
         canvas?.save()
 
         canvas?.rotate(-timeInSeconds * 6f)
@@ -119,7 +120,7 @@ class WatchView(context: Context, attributeSet: AttributeSet?, defStyleAttr: Int
         canvas?.restore()
     }
 
-    object Constants{
+    object Constants {
         const val secondHandStrokeWidth = .01f
         const val hourHandStrokeWidth = .05f
         const val minuteHandStrokeWidth = .03f
