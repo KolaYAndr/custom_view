@@ -17,8 +17,12 @@ import kotlin.math.sin
 class WatchView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
-    private val timeInSeconds = LocalTime.now().toSecondOfDay()
+    private var timeInSeconds = LocalTime.now().toSecondOfDay()
     private val paint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
+
+    init {
+        moveWithDelay()
+    }
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
@@ -30,10 +34,6 @@ class WatchView @JvmOverloads constructor(
         drawScaleLines(canvas)
         drawHands(canvas)
 
-        canvas?.restore()
-
-        canvas?.save()
-        moveWithDelay(canvas)
         canvas?.restore()
     }
 
@@ -72,7 +72,6 @@ class WatchView @JvmOverloads constructor(
         paint.strokeWidth = Constants.secondHandStrokeWidth
 
         val step = 2 * PI / 60
-        val scale = Constants.normalScaleSize
 
         for (i in 0..60) {
             val x1 = cos(2 * PI - step * i).toFloat()
@@ -81,12 +80,13 @@ class WatchView @JvmOverloads constructor(
             var x2: Float
             var y2: Float
 
+
             if (i % 5 == 0) {
                 x2 = x1 * Constants.largeScaleSize
                 y2 = y1 * Constants.largeScaleSize
             } else {
-                x2 = x1 * scale
-                y2 = y1 * scale
+                x2 = x1 * Constants.normalScaleSize
+                y2 = y1 * Constants.normalScaleSize
             }
 
             canvas?.drawLine(x1, y1, x2, y2, paint)
@@ -102,7 +102,7 @@ class WatchView @JvmOverloads constructor(
         drawSecondHand(canvas)
     }
 
-    private fun drawHourHand(canvas: Canvas?) { //method draws hour hand
+    private fun drawHourHand(canvas: Canvas?) {
         canvas?.save()
 
         canvas?.rotate(-(timeInSeconds / 3600.0 * 30).toFloat())
@@ -135,13 +135,15 @@ class WatchView @JvmOverloads constructor(
         canvas?.restore()
     }
 
-    private fun moveWithDelay(canvas: Canvas?) {
+    private fun moveWithDelay() {
         Timer().scheduleAtFixedRate(object : TimerTask() {
             override fun run() {
-                drawHands(canvas)
+                timeInSeconds = LocalTime.now().toSecondOfDay()
+                invalidate()
             }
         }, 0, 1000)
     }
+
 
     object Constants {
         const val secondHandStrokeWidth = .01f
